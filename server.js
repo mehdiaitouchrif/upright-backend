@@ -4,14 +4,18 @@ import colors from 'colors'
 import connectDB from './config/connectDB.js'
 import errorHandler from './middleweare/errorHandler.js'
 
-// Routes
-import authRoutes from './routes/authRoutes.js'
-
+// Load config vars
 dotenv.config()
-const app = express()
 
 // Connect database
 connectDB()
+
+// Routes
+import authRoutes from './routes/authRoutes.js'
+import postRoutes from './routes/postRoutes.js'
+
+// Init app
+const app = express()
 
 // Middleweare
 app.use(express.json())
@@ -22,6 +26,7 @@ app.get('/', (req, res) => {
 
 // Mount routers
 app.use('/api/v1/auth', authRoutes)
+app.use('/api/v1/posts', postRoutes)
 
 // Error handler
 app.use(errorHandler)
