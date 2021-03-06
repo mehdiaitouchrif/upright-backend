@@ -1,4 +1,6 @@
 import mongoose from 'mongoose'
+import bcrypt from 'bcryptjs'
+import jwt from 'jsonwebtoken'
 
 const { Schema, model } = mongoose
 
@@ -44,8 +46,18 @@ const userSchema = new Schema(
 		coverPhoto: {
 			type: String,
 		},
-		following: [this],
-		followers: [this],
+		following: [
+			{
+				type: Schema.Types.ObjectId,
+				ref: 'User',
+			},
+		],
+		followers: [
+			{
+				type: Schema.Types.ObjectId,
+				ref: 'User',
+			},
+		],
 		bio: String,
 		website: {
 			type: String,
@@ -71,6 +83,28 @@ const userSchema = new Schema(
 	},
 	{ timestamps: true }
 )
+
+// Hashing the password
+userSchema.pre('save', async function (next) {
+	if (!this.isModified('password')) {
+		next()
+	}
+
+	const salt = await bcrypt.genSalt(10)
+	this.password = await bcrypt.hash(this.password, salt)
+})
+
+// Get JWT token
+userSchema.methods.getSignedJwtToken = function () {
+	return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
+		expiresIn: process.env.JWT_EXPIRE,
+	})
+}
+
+// Match passwords
+userSchema.methods.matchPasswords = async function (enteredPassword) {
+	return await bcrypt.compare(enteredPassword, this.password)
+}
 
 const User = model('user', userSchema)
 
