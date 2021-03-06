@@ -5,6 +5,7 @@ const { Schema, model } = mongoose
 const postSchema = new Schema({
 	user: {
 		type: Schema.Types.ObjectId,
+		required: true,
 		ref: 'User',
 	},
 	text: {
@@ -34,6 +35,6 @@ const postSchema = new Schema({
 	],
 })
 
-const Post = model('post', postSchema)
+const Post = model('Post', postSchema)
 
 export default Post
