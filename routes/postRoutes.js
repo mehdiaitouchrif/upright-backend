@@ -8,7 +8,7 @@ import {
 } from '../controllers/postController.js'
 import protect from '../middleweare/requireAuth.js'
 
-const router = Router()
+const router = Router({ mergeParams: true })
 
 router.route('/').get(protect, getPosts).post(protect, createPost)
 router
