@@ -12,6 +12,7 @@ connectDB()
 
 // Routes
 import authRoutes from './routes/authRoutes.js'
+import userRoutes from './routes/userRoutes.js'
 import postRoutes from './routes/postRoutes.js'
 
 // Init app
@@ -26,6 +27,7 @@ app.get('/', (req, res) => {
 
 // Mount routers
 app.use('/api/v1/auth', authRoutes)
+app.use('/api/v1/users', userRoutes)
 app.use('/api/v1/posts', postRoutes)
 
 // Error handler
