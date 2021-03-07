@@ -4,7 +4,7 @@ import asyncHandler from '../middleweare/asyncHandler.js'
 
 // desc     GET Posts
 // @route   /api/v1/posts
-// @route   user posts: /api/v1/users/userId/posts
+// @route   user posts: /api/v1/users/:userId/posts
 export const getPosts = asyncHandler(async (req, res, next) => {
 	let posts
 	if (req.params.userId) {
@@ -49,8 +49,8 @@ export const getPost = asyncHandler(async (req, res, next) => {
 // @desc    Create Post
 // @route   /api/v1/posts
 export const createPost = asyncHandler(async (req, res, next) => {
-	const post = await Post.create({ ...req.body, user: req.user._id })
-	console.log(req.user)
+	req.body.user = req.user._id
+	const post = await Post.create(req.body)
 	res.status(201).json({
 		success: true,
 		data: post,
@@ -66,18 +66,23 @@ export const updatePost = asyncHandler(async (req, res, next) => {
 			new ErrorResponse(`No post found with ID: ${req.params.id}`, 404)
 		)
 	}
-	console.log(req.user)
-	if (post.user.toString() === req.user._id.toString()) {
-		const { text, image } = req.body
-		post.text = text || post.text
-		post.image = image || post.image
-		await post.save()
-
-		res.json({
-			success: true,
-			data: post,
-		})
+	if (
+		req.user._id.toString() !== post.user.toString() &&
+		user.role !== 'admin'
+	) {
+		return next(
+			new ErrorResponse(`You're not allowed to perform this action`, 403)
+		)
 	}
+	const { text, image } = req.body
+	post.text = text || post.text
+	post.image = image || post.image
+	await post.save()
+
+	res.json({
+		success: true,
+		data: post,
+	})
 })
 
 // @desc    Delete post
@@ -90,13 +95,18 @@ export const deletePost = asyncHandler(async (req, res, next) => {
 			new ErrorResponse(`No post found with ID: ${req.params.id}`, 404)
 		)
 	}
-	if (post.user.toString() === req.user._id.toString()) {
-		await post.delete()
-		res.status(200).json({
-			success: true,
-			data: 'Post deleted successfully',
-		})
-	} else {
-		return next(new ErrorResponse(`Not authorized to commit this action`, 403))
+
+	if (
+		req.user_id.toString() !== post.user.toString() &&
+		user.role !== 'admin'
+	) {
+		return next(
+			new ErrorResponse(`You're not allowed to perform this action`, 403)
+		)
 	}
+	await post.delete()
+	res.status(200).json({
+		success: true,
+		data: 'Post deleted successfully',
+	})
 })
