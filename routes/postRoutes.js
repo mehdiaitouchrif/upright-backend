@@ -5,6 +5,7 @@ import {
 	createPost,
 	getPost,
 	deletePost,
+	likePost,
 } from '../controllers/postController.js'
 import protect from '../middleweare/requireAuth.js'
 
@@ -16,5 +17,6 @@ router
 	.get(protect, getPost)
 	.patch(protect, updatePost)
 	.delete(protect, deletePost)
+router.route('/:id/like').patch(protect, likePost)
 
 export default router
