@@ -73,6 +73,12 @@ const userSchema = new Schema(
 				ref: 'Post',
 			},
 		],
+		role: {
+			type: String,
+			required: true,
+			enum: ['user', 'admin'],
+			default: 'user',
+		},
 		resetPasswordToken: String,
 		resetPasswordExpire: Date,
 		confirmEmailToken: String,
