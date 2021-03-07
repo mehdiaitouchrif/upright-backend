@@ -14,7 +14,7 @@ export const getPosts = asyncHandler(async (req, res, next) => {
 		)
 	} else {
 		posts = await Post.find().populate(
-			'user',
+			'user likedBy',
 			'firstName lastName username profilePhoto'
 		)
 	}
@@ -108,5 +108,30 @@ export const deletePost = asyncHandler(async (req, res, next) => {
 	res.status(200).json({
 		success: true,
 		data: 'Post deleted successfully',
+	})
+})
+
+// @desc	Like a post
+// @route	/api/v1/posts/:id/like
+export const likePost = asyncHandler(async (req, res, next) => {
+	const post = await Post.findById(req.params.id)
+	if (!post) {
+		return next(
+			new ErrorResponse(`No post found with ID: ${req.params.id}`, 404)
+		)
+	}
+
+	if (post.likedBy.includes(req.user._id.toString())) {
+		post.likedBy = post.likedBy.filter(
+			(like) => like.toString() !== req.user._id.toString()
+		)
+	} else {
+		post.likedBy = [...post.likedBy, req.user._id]
+	}
+	await post.save()
+
+	res.status(200).json({
+		success: true,
+		data: post,
 	})
 })
