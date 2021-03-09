@@ -15,22 +15,19 @@ const postSchema = new Schema({
 	image: {
 		type: String,
 	},
-	likedBy: [
+	likes: [
 		{
 			type: Schema.Types.ObjectId,
 			ref: 'User',
 		},
 	],
-	sharedBy: [
+	shares: [
 		{
-			type: Schema.Types.ObjectId,
-			ref: 'User',
-		},
-	],
-	comments: [
-		{
-			type: Schema.Types.ObjectId,
-			ref: 'Comment',
+			user: {
+				type: Schema.Types.ObjectId,
+				ref: 'User',
+			},
+			text: String,
 		},
 	],
 })

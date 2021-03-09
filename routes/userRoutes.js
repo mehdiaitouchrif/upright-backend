@@ -19,5 +19,4 @@ router
 	.delete(protect, deleteUser)
 	.patch(protect, updateUser)
 	.get(protect, getUser)
-
 export default router
