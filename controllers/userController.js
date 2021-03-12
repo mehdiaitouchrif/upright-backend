@@ -1,4 +1,5 @@
 import User from '../models/User.js'
+import Post from '../models/Post.js'
 import ErrorResponse from '../helpers/errorResponse.js'
 import asyncHandler from '../middleweare/asyncHandler.js'
 
@@ -129,5 +130,34 @@ export const followUser = asyncHandler(async (req, res, next) => {
 	res.status(200).json({
 		success: true,
 		data: user,
+	})
+})
+
+// desc		Populate user feed
+// @route	GET /api/v1/users/populate
+export const populateFeed = asyncHandler(async (req, res, next) => {
+	const loggedUser = await User.findById(req.user._id)
+
+	const posts = await Post.find({ user: loggedUser.following })
+
+	res.json({
+		success: true,
+		count: posts.length,
+		data: posts,
+	})
+})
+
+// @desc	Recommend people to follow
+// @route	GET /api/v1/users/recommend
+export const recommendFollows = asyncHandler(async (req, res, next) => {
+	const notFollowing = await User.find().where('_id').nin(req.user.following)
+	const recommended = notFollowing.filter(
+		(us) => us._id.toString() !== req.user._id.toString()
+	)
+
+	res.status(200).json({
+		success: true,
+		count: recommended.length,
+		data: recommended,
 	})
 })
