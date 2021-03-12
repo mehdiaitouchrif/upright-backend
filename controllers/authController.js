@@ -1,4 +1,6 @@
+import crypto from 'crypto'
 import ErrorResponse from '../helpers/errorResponse.js'
+import sendEmail from '../helpers/sendEmail.js'
 import asyncHandler from '../middleweare/asyncHandler.js'
 import User from '../models/User.js'
 
@@ -72,4 +74,61 @@ export const changePassword = asyncHandler(async (req, res, next) => {
 	} else {
 		return next(new ErrorResponse('Incorrect password', 400))
 	}
+})
+
+// @desc 	Send confirmation email
+// @route	POST /api/v1/auth/sendconfirmationemail
+export const sendConfirmationEmail = asyncHandler(async (req, res, next) => {
+	const user = await User.findById(req.user._id)
+	const token = await user.getConfirmationToken()
+	await user.save()
+
+	const url = `${req.protocol}://${req.get('host')}/confirmemail/${token}`
+
+	try {
+		await sendEmail({
+			to: user.email,
+			subject: 'Upright - Verify your Email',
+			greeting: `Hey ${user.firstName}`,
+			message:
+				'Please confirm your Upright email address by following the link below.',
+			url,
+			urlTitle: 'Verify your Email',
+		})
+		res.status(200).json({
+			success: true,
+			data: 'Confirmation email sent successfully',
+		})
+	} catch (error) {
+		console.error(error)
+		user.confirmEmailToken = undefined
+		await user.save()
+		return next(new ErrorResponse('Email sending failed', 500))
+	}
+})
+
+// @desc	Confirm email
+// @route 	/api/v1/auth/confirmemail/:token
+export const confirmEmail = asyncHandler(async (req, res, next) => {
+	const token = req.params.token
+
+	// Hash token
+	const hashedToken = crypto.createHash('sha256').update(token).digest('hex')
+
+	const user = await User.findOne({ confirmEmailToken: hashedToken })
+
+	if (!user) {
+		return next(new ErrorResponse('Invalid email confirmation token', 400))
+	}
+
+	user.confirmEmailToken = undefined
+	user.isEmailConfirmed = true
+	await user.save()
+
+	const jwtToken = user.getSignedJwtToken()
+	res.status(200).json({
+		success: true,
+		data: user,
+		token: jwtToken,
+	})
 })
