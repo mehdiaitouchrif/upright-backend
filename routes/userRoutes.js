@@ -14,7 +14,9 @@ const router = Router()
 
 // Include post resource
 import postRouter from './postRoutes.js'
+import commentRouter from './commentRoutes.js'
 router.use('/:userId/posts', postRouter)
+router.use('/:userId/comments', commentRouter)
 
 router.get('/populate', protect, populateFeed)
 router.get('/recommend', protect, recommendFollows)
