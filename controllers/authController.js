@@ -92,9 +92,89 @@ export const changePassword = asyncHandler(async (req, res, next) => {
 	}
 })
 
+// @desc	Request password reset
+// @route 	POST /api/v1/auth/resetpassword
+export const requestPasswordReset = async (req, res, next) => {
+	const { email, username } = req.body
+
+	if (!email && !username) {
+		return next(
+			new ErrorResponse('Please enter your account email or username', 400)
+		)
+	}
+	const user =
+		(await User.findOne({ email })) || (await User.findOne({ username }))
+
+	if (!user) {
+		return next(
+			new ErrorResponse("Sorry. We couldn't find any user with this data", 404)
+		)
+	}
+
+	const token = user.getResetPasswordToken()
+	await user.save()
+
+	const url = `${req.protocol}://${req.get('host')}/resetpassword/${token}`
+
+	try {
+		await sendEmail({
+			to: user.email,
+			subject: 'Upright - Reset Password',
+			greeting: `Hey ${user.firstName}`,
+			message:
+				'You are recieving this email because you or someone else request a password reset.',
+			url,
+			additionalHTML: `
+				<p style="color: #000; font-size: 17px; margin-bottom:5px">To reset your password, please  copy the code bellow to the reset form. </p>
+				<p style="background: #eee; padding: 10px; font-size: 18px; margin: 5px 0; display: inline-block;">${token}</p>
+				<p style="color: #333; font-size: 14.5px;">PS: Please note that this code will expire within 15 minutes</p>
+			`,
+		})
+		res.status(200).json({
+			success: true,
+			data: 'Reset email succeeded',
+		})
+	} catch (error) {
+		console.error(error)
+		user.resetPasswordToken = undefined
+		user.resetPasswordExpire = undefined
+		await user.save()
+		return next(new ErrorResponse('Reset email failed', 500))
+	}
+}
+
+// @desc 	Reset password
+// @route 	PATCH /api/v1/auth/resetpassword/:token
+export const resetPassword = asyncHandler(async (req, res, next) => {
+	const token = req.params.token
+
+	// Hash token
+	const hashedToken = crypto.createHash('sha256').update(token).digest('hex')
+
+	const user = await User.findOne({
+		resetPasswordToken: hashedToken,
+		resetPasswordExpire: { $gt: Date.now() },
+	})
+
+	if (!user) {
+		return next(new ErrorResponse('Invalid reset token', 400))
+	}
+
+	user.password = req.body.password
+	user.resetPasswordExpire = undefined
+	user.resetPasswordToken = undefined
+
+	await user.save()
+
+	res.status(200).json({
+		success: true,
+		data: 'Password reset succeeded',
+	})
+})
+
 // @desc 	Send confirmation email
 // @route	POST /api/v1/auth/sendconfirmationemail
-export const sendConfirmationEmail = asyncHandler(async (req, res, next) => {
+export const sendConfirmationEmail = async (req, res, next) => {
 	const user = await User.findById(req.user._id)
 	const token = await user.getConfirmationToken()
 	await user.save()
@@ -121,7 +201,7 @@ export const sendConfirmationEmail = asyncHandler(async (req, res, next) => {
 		await user.save()
 		return next(new ErrorResponse('Confirmation email failed', 500))
 	}
-})
+}
 
 // @desc	Confirm email
 // @route 	/api/v1/auth/confirmemail/:token
