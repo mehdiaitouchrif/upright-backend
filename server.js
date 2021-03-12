@@ -1,3 +1,4 @@
+import path from 'path'
 import express from 'express'
 import dotenv from 'dotenv'
 import colors from 'colors'
@@ -15,12 +16,16 @@ import authRoutes from './routes/authRoutes.js'
 import userRoutes from './routes/userRoutes.js'
 import postRoutes from './routes/postRoutes.js'
 import commentRoutes from './routes/commentRoutes.js'
+import uploadRoutes from './routes/uploadRoutes.js'
 
 // Init app
 const app = express()
 
 // Middleweare
 app.use(express.json())
+
+const __dirname = path.resolve()
+app.use(express.static(path.join(__dirname, '/public')))
 
 app.get('/', (req, res) => {
 	res.send('helloo')
@@ -31,6 +36,7 @@ app.use('/api/v1/auth', authRoutes)
 app.use('/api/v1/users', userRoutes)
 app.use('/api/v1/posts', postRoutes)
 app.use('/api/v1/comments', commentRoutes)
+app.use('/api/v1/upload', uploadRoutes)
 
 // Error handler
 app.use(errorHandler)
