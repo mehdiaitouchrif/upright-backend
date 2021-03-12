@@ -15,7 +15,7 @@ import protect from '../middleweare/requireAuth.js'
 const router = Router({ mergeParams: true })
 
 import commentRouter from './commentRoutes.js'
-router.use('/:postId/comment', commentRouter)
+router.use('/:postId/comments', commentRouter)
 
 router.route('/').get(protect, getPosts).post(protect, createPost)
 router
