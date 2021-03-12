@@ -14,6 +14,7 @@ connectDB()
 import authRoutes from './routes/authRoutes.js'
 import userRoutes from './routes/userRoutes.js'
 import postRoutes from './routes/postRoutes.js'
+import commentRoutes from './routes/commentRoutes.js'
 
 // Init app
 const app = express()
@@ -29,6 +30,7 @@ app.get('/', (req, res) => {
 app.use('/api/v1/auth', authRoutes)
 app.use('/api/v1/users', userRoutes)
 app.use('/api/v1/posts', postRoutes)
+app.use('/api/v1/comments', commentRoutes)
 
 // Error handler
 app.use(errorHandler)
