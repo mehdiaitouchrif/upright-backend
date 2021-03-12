@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
+import crypto from 'crypto'
 
 const { Schema, model } = mongoose
 
@@ -110,6 +111,20 @@ userSchema.methods.getSignedJwtToken = function () {
 // Match passwords
 userSchema.methods.matchPasswords = async function (enteredPassword) {
 	return await bcrypt.compare(enteredPassword, this.password)
+}
+
+// Send Email confirmation token
+userSchema.methods.getConfirmationToken = function () {
+	// Generate token
+	const confirmationToken = crypto.randomBytes(20).toString('hex')
+
+	// Hash it
+	this.confirmEmailToken = crypto
+		.createHash('sha256')
+		.update(confirmationToken)
+		.digest('hex')
+
+	return confirmationToken
 }
 
 const User = model('User', userSchema)
