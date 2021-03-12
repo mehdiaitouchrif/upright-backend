@@ -4,6 +4,7 @@ import {
 	getUser,
 	deleteUser,
 	updateUser,
+	followUser,
 } from '../controllers/userController.js'
 import protect from '../middleweare/requireAuth.js'
 
@@ -19,4 +20,5 @@ router
 	.delete(protect, deleteUser)
 	.patch(protect, updateUser)
 	.get(protect, getUser)
+router.patch('/:id/follow', protect, followUser)
 export default router

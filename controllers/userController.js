@@ -5,7 +5,10 @@ import asyncHandler from '../middleweare/asyncHandler.js'
 // @desc    GET all users
 // @route   /api/v1/users
 export const getUsers = asyncHandler(async (req, res, next) => {
-	const users = await User.find()
+	const users = await User.find().populate(
+		'following followers',
+		'firstName lastName username profilePhoto'
+	)
 	res.status(200).json({
 		success: true,
 		count: users.length,
@@ -16,7 +19,10 @@ export const getUsers = asyncHandler(async (req, res, next) => {
 // @desc    GET single user
 // @route   /api/v1/users/:id
 export const getUser = asyncHandler(async (req, res, next) => {
-	const user = await User.findById(req.params.id)
+	const user = await User.findById(req.params.id).populate(
+		'following followers',
+		'firstName lastName username profilePhoto'
+	)
 	if (!user) {
 		return next(
 			new ErrorResponse(`No user found with ID: ${req.params.id}`, 404)
@@ -85,5 +91,43 @@ export const deleteUser = asyncHandler(async (req, res, next) => {
 	res.status(200).json({
 		success: true,
 		data: 'User deleted permanently',
+	})
+})
+
+// @desc	Follow a user
+// @route 	/api/v1/users/:id/follow
+export const followUser = asyncHandler(async (req, res, next) => {
+	const user = await User.findById(req.params.id)
+	const loggedUser = await User.findById(req.user._id)
+	if (!user) {
+		return next(
+			new ErrorResponse(`No user found with ID: ${req.params.id}`, 404)
+		)
+	}
+
+	if (user._id.toString() === loggedUser._id.toString()) {
+		return next(new ErrorResponse('You cannot follow yourself', 400))
+	}
+
+	if (user.followers.includes(loggedUser._id)) {
+		// Un-follow
+		user.followers = user.followers.filter(
+			(user) => user._id.toString() !== loggedUser._id.toString()
+		)
+		loggedUser.following = loggedUser.following.filter(
+			(user) => user._id.toString() !== user._id.toString()
+		)
+	} else {
+		// Follow
+		user.followers = [...user.followers, loggedUser._id]
+		loggedUser.following = [...loggedUser.following, user._id]
+	}
+
+	await user.save()
+	await loggedUser.save()
+
+	res.status(200).json({
+		success: true,
+		data: user,
 	})
 })
