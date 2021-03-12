@@ -127,6 +127,21 @@ userSchema.methods.getConfirmationToken = function () {
 	return confirmationToken
 }
 
+// Get password reset
+userSchema.methods.getResetPasswordToken = function () {
+	const resetToken = crypto.randomBytes(20).toString('hex')
+
+	this.resetPasswordToken = crypto
+		.createHash('sha256')
+		.update(resetToken)
+		.digest('hex')
+
+	// Set exipre date
+	this.resetPasswordExpire = Date.now() + 1000 * 60 * 15
+
+	return resetToken
+}
+
 const User = model('User', userSchema)
 
 export default User
