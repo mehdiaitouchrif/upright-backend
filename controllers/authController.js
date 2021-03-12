@@ -10,6 +10,15 @@ export const signUp = asyncHandler(async (req, res, next) => {
 	const user = await User.create(req.body)
 	const token = user.getSignedJwtToken()
 
+	res.status(201).json({
+		success: true,
+		data: user,
+		token,
+	})
+
+	// Send emails
+	const url = `${req.protocol}://${req.get('host')}/confirmemail/${token}`
+
 	try {
 		await sendEmail({
 			to: user.email,
@@ -20,16 +29,21 @@ export const signUp = asyncHandler(async (req, res, next) => {
 			url: 'upright.netlify.app',
 			urlTitle: 'Visit Upright',
 		})
+		await sendEmail({
+			to: user.email,
+			subject: 'Upright - Verify your Email',
+			greeting: `Hey ${user.firstName}`,
+			message:
+				'Please confirm your Upright email address by following the link below.',
+			url,
+			urlTitle: 'Verify your Email',
+		})
 	} catch (error) {
 		console.error(error)
-		return next(new ErrorResponse('Welcome email failed', 500))
+		return next(
+			new ErrorResponse('Confirmation and/or welcome emails failed', 500)
+		)
 	}
-
-	res.status(201).json({
-		success: true,
-		data: user,
-		token,
-	})
 })
 
 // @desc	Login
