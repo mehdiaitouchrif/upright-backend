@@ -17,11 +17,20 @@ const sendEmail = async (config) => {
 		to: config.to,
 		subject: config.subject,
 		html: `
-        <body style="border: 1px solid #ccc; border-radius: 4px; padding: 10px 20px;">
+        <body style="padding: 10px 20px; max-width: 700px; margin: auto;">
             <main>
                 <p style="color: #000; font-size: 17px;">${config.greeting}</p>
-                <p style="margin-bottom: 10px; color: #000; font-size: 17px;">${config.message}</p>
+                <p style="margin-bottom: 5px; color: #000; font-size: 17px;">${
+									config.message
+								}</p>
+                ${config.additionalHTML ? config.additionalHTML : ''}
+                ${
+									config.urlTitle
+										? `
                 <a style="display: inline-block; margin: 10px 0; padding: 10px 18px; font-size: 16px; background-color: red; color: white; cursor: pointer; text-decoration: none;" href="${config.url}" target="_blank">${config.urlTitle}</a>
+                `
+										: ''
+								}
             </main>
             <footer style="padding: 16px 0;">
                 <p style="font-size: 14px; color: #666;">Upright &copy; 2021. </p>
