@@ -5,9 +5,20 @@ import asyncHandler from '../middleweare/asyncHandler.js'
 // @desc    Get User comments | Get all comments
 // @route   GET /api/v1/users/:userId/comments
 // @route   GET /api/v1/comments
+// @router  /api/v1/posts/:postId/comment
 export const getComments = asyncHandler(async (req, res, next) => {
 	if (req.params.userId) {
 		const comments = await Comment.find({ user: req.params.userId }).populate(
+			'user post'
+		)
+
+		res.status(200).json({
+			success: true,
+			count: comments.length,
+			data: comments,
+		})
+	} else if (req.params.postId) {
+		const comments = await Comment.find({ post: req.params.postId }).populate(
 			'user post'
 		)
 
