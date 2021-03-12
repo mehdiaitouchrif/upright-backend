@@ -9,6 +9,22 @@ import User from '../models/User.js'
 export const signUp = asyncHandler(async (req, res, next) => {
 	const user = await User.create(req.body)
 	const token = user.getSignedJwtToken()
+
+	try {
+		await sendEmail({
+			to: user.email,
+			subject: 'Upright - Welcome',
+			greeting: `Hey ${user.firstName}`,
+			message:
+				"Welcome to Upright. You've just opened an Upright account and are set to begin interacting with other users around the world.",
+			url: 'upright.netlify.app',
+			urlTitle: 'Visit Upright',
+		})
+	} catch (error) {
+		console.error(error)
+		return next(new ErrorResponse('Welcome email failed', 500))
+	}
+
 	res.status(201).json({
 		success: true,
 		data: user,
@@ -97,13 +113,13 @@ export const sendConfirmationEmail = asyncHandler(async (req, res, next) => {
 		})
 		res.status(200).json({
 			success: true,
-			data: 'Confirmation email sent successfully',
+			data: 'Confirmation email succeeded',
 		})
 	} catch (error) {
 		console.error(error)
 		user.confirmEmailToken = undefined
 		await user.save()
-		return next(new ErrorResponse('Email sending failed', 500))
+		return next(new ErrorResponse('Confirmation email failed', 500))
 	}
 })
 
