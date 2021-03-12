@@ -7,6 +7,8 @@ import {
 	deletePost,
 	likePost,
 	sharePost,
+	getLikedPosts,
+	getSharedPosts,
 } from '../controllers/postController.js'
 import protect from '../middleweare/requireAuth.js'
 
@@ -20,7 +22,7 @@ router
 	.delete(protect, deletePost)
 router.patch('/:id/like', protect, likePost)
 router.patch('/:id/share', protect, sharePost)
-// router.get('/likes', protect, getLikedPosts)
-// router.get('/shares', protect, getSharedPosts)
+router.get('/:userId/likes', protect, getLikedPosts)
+router.get('/:userId/shares', protect, getSharedPosts)
 
 export default router
