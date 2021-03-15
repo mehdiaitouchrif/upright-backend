@@ -2,6 +2,7 @@ import path from 'path'
 import express from 'express'
 import dotenv from 'dotenv'
 import colors from 'colors'
+import cors from 'cors'
 import connectDB from './config/connectDB.js'
 import errorHandler from './middleweare/errorHandler.js'
 
@@ -23,6 +24,9 @@ const app = express()
 
 // Middleweare
 app.use(express.json())
+
+// Allow CORS
+app.use(cors())
 
 const __dirname = path.resolve()
 app.use(express.static(path.join(__dirname, '/public')))
