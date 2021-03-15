@@ -7,6 +7,7 @@ import {
 	requestPasswordReset,
 	signUp,
 	resetPassword,
+	getCurrent,
 } from '../controllers/authController.js'
 import protect from '../middleweare/requireAuth.js'
 
@@ -14,6 +15,7 @@ const router = Router()
 
 router.post('/signup', signUp)
 router.post('/login', login)
+router.get('/me', protect, getCurrent)
 router.patch('/changepassword', protect, changePassword)
 router.post('/sendconfirmationemail', protect, sendConfirmationEmail)
 router.patch('/confirmemail/:token', confirmEmail)

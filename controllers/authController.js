@@ -77,6 +77,23 @@ export const login = asyncHandler(async (req, res, next) => {
 	})
 })
 
+// @desc	Get currently logged in user
+// @route	/api/v1/auth/current
+export const getCurrent = asyncHandler(async (req, res, next) => {
+	const user = await User.findById(req.user._id)
+
+	if (!user) {
+		return next(
+			new ErrorResponse(`No user found with ID: ${req.user._id}`, 404)
+		)
+	}
+
+	res.status(200).json({
+		success: true,
+		data: user,
+	})
+})
+
 // @desc	Change password
 // @route	/api/v1/auth/changepassword
 export const changePassword = asyncHandler(async (req, res, next) => {
