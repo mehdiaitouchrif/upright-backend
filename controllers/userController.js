@@ -138,15 +138,13 @@ export const followUser = asyncHandler(async (req, res, next) => {
 export const populateFeed = asyncHandler(async (req, res, next) => {
 	const loggedUser = await User.findById(req.user._id)
 
-	const posts = await Post.find({ user: loggedUser.following }).populate(
-		'user',
-		'firstName lastName username profilePhoto'
-	)
+	const posts = await Post.find({ user: loggedUser.following })
+		.populate('user', 'firstName lastName username profilePhoto')
+		.sort('createdAt', -1)
 
-	const userPosts = await Post.find({ user: req.user._id }).populate(
-		'user',
-		'firstName lastName username profilePhoto'
-	)
+	const userPosts = await Post.find({ user: req.user._id })
+		.populate('user', 'firstName lastName username profilePhoto')
+		.sort('createdAt', -1)
 
 	res.json({
 		success: true,
