@@ -140,11 +140,11 @@ export const populateFeed = asyncHandler(async (req, res, next) => {
 
 	const posts = await Post.find({ user: loggedUser.following })
 		.populate('user', 'firstName lastName username profilePhoto')
-		.sort('createdAt', -1)
+		.sort({ createdAt: -1 })
 
 	const userPosts = await Post.find({ user: req.user._id })
 		.populate('user', 'firstName lastName username profilePhoto')
-		.sort('createdAt', -1)
+		.sort({ createdAt: -1 })
 
 	res.json({
 		success: true,
