@@ -143,10 +143,12 @@ export const populateFeed = asyncHandler(async (req, res, next) => {
 		'firstName lastName username profilePhoto'
 	)
 
+	const userPosts = await Post.find({ user: req.user._id })
+
 	res.json({
 		success: true,
-		count: posts.length,
-		data: posts,
+		count: [...posts, ...userPosts].length,
+		data: [...posts, ...userPosts],
 	})
 })
 
