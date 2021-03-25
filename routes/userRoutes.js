@@ -22,11 +22,8 @@ router.get('/populate', protect, populateFeed)
 router.get('/recommend', protect, recommendFollows)
 
 router.route('/').get(protect, getUsers)
-router
-	.route('/:id')
-	.delete(protect, deleteUser)
-	.patch(protect, updateUser)
-	.get(protect, getUser)
+router.route('/:id').delete(protect, deleteUser).patch(protect, updateUser)
+router.get('/:username', protect, getUser)
 router.patch('/:id/follow', protect, followUser)
 
 export default router

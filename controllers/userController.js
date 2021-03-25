@@ -18,15 +18,18 @@ export const getUsers = asyncHandler(async (req, res, next) => {
 })
 
 // @desc    GET single user
-// @route   /api/v1/users/:id
+// @route   /api/v1/users/:username
 export const getUser = asyncHandler(async (req, res, next) => {
-	const user = await User.findById(req.params.id).populate(
+	const user = await User.findOne({ username: req.params.username }).populate(
 		'following followers',
 		'firstName lastName username profilePhoto'
 	)
 	if (!user) {
 		return next(
-			new ErrorResponse(`No user found with ID: ${req.params.id}`, 404)
+			new ErrorResponse(
+				`No user found with username: ${req.params.username}`,
+				404
+			)
 		)
 	}
 	res.status(200).json({
@@ -144,7 +147,7 @@ export const populateFeed = asyncHandler(async (req, res, next) => {
 
 	const userPosts = await Post.find({ user: req.user._id })
 		.populate('user', 'firstName lastName username profilePhoto')
-		.sort({ createdAt: -1 })
+		.sort({ createdAt: 1 })
 
 	res.json({
 		success: true,
