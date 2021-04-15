@@ -38,20 +38,21 @@ const upload = multer({
 router.post('/profile', upload.single('profile'), function (req, res) {
 	res.json({
 		success: true,
-		data: '.' + `/${req.file.path}`.split('/').splice(2, 3).join('/'),
+		data: `/${req.file.path}`.split('/').splice(2, 3).join('/'),
 	})
 })
-router.post('/profile', upload.single('profile'), function (req, res) {
+router.post('/cover', upload.single('cover'), function (req, res) {
 	res.json({
 		success: true,
-		data: '.' + `/${req.file.path}`.split('/').splice(2, 3).join('/'),
+		data: `/${req.file.path}`.split('/').splice(2, 3).join('/'),
 	})
 })
 
-router.post('/post', upload.array('post', 6), function (req, res) {
+router.post('/post', upload.single('post'), function (req, res) {
 	res.json({
 		success: true,
-		data: '.' + `/${req.file.path}`.split('/').splice(2, 3).join('/'),
+		// data: req.file.path,
+		data: `/${req.file.path}`.split('/').splice(2, 3).join('/'),
 	})
 })
 
