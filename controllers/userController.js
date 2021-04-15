@@ -6,10 +6,31 @@ import asyncHandler from '../middleweare/asyncHandler.js'
 // @desc    GET all users
 // @route   /api/v1/users
 export const getUsers = asyncHandler(async (req, res, next) => {
-	const users = await User.find().populate(
+	let search = {}
+
+	if (req.query.search) {
+		search = {
+			username: {
+				$regex: req.query.search,
+				$options: 'i',
+			},
+		} || {
+				firstName: {
+					$regex: req.query.search,
+					$options: 'i',
+				},
+			} || {
+				lastName: {
+					$regex: req.query.search,
+					$options: 'i',
+				},
+			}
+	}
+	const users = await User.find({ ...search }).populate(
 		'following followers',
 		'firstName lastName username profilePhoto'
 	)
+
 	res.status(200).json({
 		success: true,
 		count: users.length,
@@ -57,11 +78,20 @@ export const updateUser = asyncHandler(async (req, res, next) => {
 		)
 	}
 
-	const { firstName, lastName, username, email } = req.body
+	const {
+		firstName,
+		lastName,
+		username,
+		email,
+		profilePhoto,
+		coverPhoto,
+	} = req.body
 	user.firstName = firstName || user.firstName
 	user.lastName = lastName || user.lastName
 	user.username = username || user.username
 	user.email = email || user.email
+	user.profilePhoto = profilePhoto || user.profilePhoto
+	user.coverPhoto = coverPhoto || user.coverPhoto
 
 	await user.save()
 
@@ -139,9 +169,17 @@ export const followUser = asyncHandler(async (req, res, next) => {
 // desc		Populate user feed
 // @route	GET /api/v1/users/populate
 export const populateFeed = asyncHandler(async (req, res, next) => {
+	// Pagination
+	const pageNumber = Number(req.query.page) || 1
+	const pageSize = Number(req.query.limit) || 4
+	const skip = (pageNumber - 1) * pageSize
+	const count = await Post.countDocuments()
+
 	const loggedUser = await User.findById(req.user._id)
 
 	const posts = await Post.find({ user: loggedUser.following })
+		.skip(skip)
+		.limit(pageSize)
 		.populate('user', 'firstName lastName username profilePhoto')
 		.sort({ createdAt: -1 })
 
@@ -149,9 +187,24 @@ export const populateFeed = asyncHandler(async (req, res, next) => {
 		.populate('user', 'firstName lastName username profilePhoto')
 		.sort({ createdAt: 1 })
 
+	// Pagination result
+	const paginationObj = {
+		page: pageNumber,
+		pages: Math.ceil(count / pageSize),
+	}
+
+	if (pageNumber * pageSize < count) {
+		paginationObj.nextPage = pageNumber + 1
+	}
+
+	if (skip > 0) {
+		paginationObj.previousPage = pageNumber - 1
+	}
+
 	res.json({
 		success: true,
 		count: [...posts, ...userPosts].length,
+		pagination: paginationObj,
 		data: [...posts, ...userPosts],
 	})
 })
