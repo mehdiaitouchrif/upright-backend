@@ -184,6 +184,9 @@ export const populateFeed = asyncHandler(async (req, res, next) => {
 		.sort({ createdAt: -1 })
 
 	const userPosts = await Post.find({ user: req.user._id })
+		.skip(skip)
+		.limit(pageSize)
+
 		.populate('user', 'firstName lastName username profilePhoto')
 		.sort({ createdAt: 1 })
 
