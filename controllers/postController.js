@@ -63,9 +63,10 @@ export const getPost = asyncHandler(async (req, res, next) => {
 export const createPost = asyncHandler(async (req, res, next) => {
 	req.body.user = req.user._id
 	const post = await Post.create(req.body)
+	const populated = await Post.findById(post._id).populate('user')
 	res.status(201).json({
 		success: true,
-		data: post,
+		data: populated,
 	})
 })
 
