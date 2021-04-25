@@ -18,9 +18,9 @@ export const getComments = asyncHandler(async (req, res, next) => {
 			data: comments,
 		})
 	} else if (req.params.postId) {
-		const comments = await Comment.find({ post: req.params.postId }).populate(
-			'user post'
-		)
+		const comments = await Comment.find({ post: req.params.postId })
+			.sort({ createdAt: '-1' })
+			.populate('user post')
 
 		res.status(200).json({
 			success: true,
@@ -38,6 +38,23 @@ export const getComments = asyncHandler(async (req, res, next) => {
 	}
 })
 
+// @desc 	GET single Comment
+// @route	/api/v1/comments/:id
+export const getComment = asyncHandler(async (req, res, next) => {
+	const comment = await Comment.findById(req.params.id).populate('user')
+
+	if (!comment) {
+		return next(
+			new ErrorResponse(`No comment found with ID: ${req.params.id}`, 404)
+		)
+	}
+
+	res.status(200).json({
+		success: true,
+		data: comment,
+	})
+})
+
 // @desc    Add comment
 // @route   POST /api/v1/posts/:postId/comment
 export const addComment = asyncHandler(async (req, res, next) => {
@@ -45,10 +62,11 @@ export const addComment = asyncHandler(async (req, res, next) => {
 		req.body.post = req.params.postId
 		req.body.user = req.user._id
 		const comment = await Comment.create(req.body)
+		const populated = await Comment.findById(comment._id).populate('user')
 
 		res.status(201).json({
 			success: true,
-			data: comment,
+			data: populated,
 		})
 	}
 })
@@ -74,9 +92,11 @@ export const updateComment = asyncHandler(async (req, res, next) => {
 	comment.text = req.body.text || comment.text
 	await comment.save()
 
+	const populated = await Comment.findById(comment._id).populate('user')
+
 	res.status(200).json({
 		success: true,
-		data: comment,
+		data: populated,
 	})
 })
 

@@ -91,9 +91,11 @@ export const updatePost = asyncHandler(async (req, res, next) => {
 	post.image = image || post.image
 	await post.save()
 
+	const populated = await Post.findById(post._id).populate('user')
+
 	res.json({
 		success: true,
-		data: post,
+		data: populated,
 	})
 })
 

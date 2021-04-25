@@ -85,6 +85,8 @@ export const updateUser = asyncHandler(async (req, res, next) => {
 		email,
 		profilePhoto,
 		coverPhoto,
+		bio,
+		website,
 	} = req.body
 	user.firstName = firstName || user.firstName
 	user.lastName = lastName || user.lastName
@@ -92,6 +94,8 @@ export const updateUser = asyncHandler(async (req, res, next) => {
 	user.email = email || user.email
 	user.profilePhoto = profilePhoto || user.profilePhoto
 	user.coverPhoto = coverPhoto || user.coverPhoto
+	user.bio = bio || user.bio
+	user.website = website || user.website
 
 	await user.save()
 
@@ -171,7 +175,7 @@ export const followUser = asyncHandler(async (req, res, next) => {
 export const populateFeed = asyncHandler(async (req, res, next) => {
 	// Pagination
 	const pageNumber = Number(req.query.page) || 1
-	const pageSize = Number(req.query.limit) || 4
+	const pageSize = Number(req.query.limit) || 20
 	const skip = (pageNumber - 1) * pageSize
 	const count = await Post.countDocuments()
 
