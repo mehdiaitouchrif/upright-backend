@@ -9,6 +9,7 @@ import User from '../models/User.js'
 export const signUp = asyncHandler(async (req, res, next) => {
 	const user = await User.create(req.body)
 	const token = user.getSignedJwtToken()
+	const confirmationToken = user.getConfirmationToken()
 
 	res.status(201).json({
 		success: true,
@@ -17,7 +18,7 @@ export const signUp = asyncHandler(async (req, res, next) => {
 	})
 
 	// Send emails
-	const url = `https://uprightsocial.netlify.app/confirmemail/${token}`
+	const url = `https://uprightsocial.netlify.app/confirmemail/${confirmationToken}`
 
 	try {
 		await sendEmail({
