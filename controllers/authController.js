@@ -26,7 +26,7 @@ export const signUp = asyncHandler(async (req, res, next) => {
 			greeting: `Hey ${user.firstName}`,
 			message:
 				"Welcome to Upright. You've just opened an Upright account and are set to begin interacting with other users around the world.",
-			url: 'upright.netlify.app',
+			url: 'https://uprightsocial.netlify.app',
 			urlTitle: 'Visit Upright',
 		})
 		await sendEmail({
