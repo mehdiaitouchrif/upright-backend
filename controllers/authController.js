@@ -11,6 +11,7 @@ export const signUp = asyncHandler(async (req, res, next) => {
 	const token = user.getSignedJwtToken()
 	const confirmationToken = user.getConfirmationToken()
 
+	await user.save()
 	res.status(201).json({
 		success: true,
 		data: user,
