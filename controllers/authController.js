@@ -17,7 +17,7 @@ export const signUp = asyncHandler(async (req, res, next) => {
 	})
 
 	// Send emails
-	const url = `${req.protocol}://${req.get('host')}/confirmemail/${token}`
+	const url = `https://uprightsocial.netlify.app/confirmemail/${token}`
 
 	try {
 		await sendEmail({
@@ -145,7 +145,7 @@ export const requestPasswordReset = async (req, res, next) => {
 	const token = user.getResetPasswordToken()
 	await user.save()
 
-	const url = `${req.protocol}://${req.get('host')}/resetpassword/${token}`
+	const url = `https://uprightsocial.netlify.app/resetpassword/${token}`
 
 	try {
 		await sendEmail({
