@@ -1,243 +1,242 @@
-import Post from '../models/Post.js'
-import ErrorResponse from '../helpers/errorResponse.js'
-import asyncHandler from '../middleweare/asyncHandler.js'
+import Post from "../models/Post.js";
+import ErrorResponse from "../helpers/errorResponse.js";
+import asyncHandler from "../middleweare/asyncHandler.js";
 
 // desc     GET Posts
 // @route   /api/v1/posts
 // @route   user posts: /api/v1/users/:userId/posts
 export const getPosts = asyncHandler(async (req, res, next) => {
-	let posts
-	if (req.params.userId) {
-		posts = await Post.find({ user: req.params.userId }).populate({
-			path: 'user likes shares',
-			select: 'firstName lastName username profilePhoto',
-			populate: {
-				path: 'user',
-				select: 'firstName lastName username profilePhoto',
-			},
-		})
-	} else {
-		posts = await Post.find().populate({
-			path: 'user shares likes',
-			select: 'firstName lastName username profilePhoto',
-			populate: {
-				path: 'user',
-				select: 'firstName lastName username profilePhoto',
-			},
-		})
-	}
+  let posts;
+  if (req.params.userId) {
+    posts = await Post.find({ user: req.params.userId }).populate({
+      path: "user likes shares",
+      select: "firstName lastName username profilePhoto",
+      populate: {
+        path: "user",
+        select: "firstName lastName username profilePhoto",
+      },
+    });
+  } else {
+    posts = await Post.find().populate({
+      path: "user shares likes",
+      select: "firstName lastName username profilePhoto",
+      populate: {
+        path: "user",
+        select: "firstName lastName username profilePhoto",
+      },
+    });
+  }
 
-	res.status(200).json({
-		success: true,
-		count: posts.length,
-		data: posts,
-	})
-})
+  res.status(200).json({
+    success: true,
+    count: posts.length,
+    data: posts,
+  });
+});
 
 // @desc    GET single post
 // @route   /api/v1/posts/:id
 export const getPost = asyncHandler(async (req, res, next) => {
-	const post = await Post.findById(req.params.id).populate({
-		path: 'user shares likes',
-		select: 'firstName lastName username profilePhoto',
-		populate: {
-			path: 'user',
-			select: 'firstName lastName username profilePhoto',
-		},
-	})
+  const post = await Post.findById(req.params.id).populate({
+    path: "user shares likes",
+    select: "firstName lastName username profilePhoto",
+    populate: {
+      path: "user",
+      select: "firstName lastName username profilePhoto",
+    },
+  });
 
-	if (!post) {
-		return next(
-			new ErrorResponse(`No post found with ID: ${req.params.id}`, 404)
-		)
-	}
+  if (!post) {
+    return next(
+      new ErrorResponse(`No post found with ID: ${req.params.id}`, 404)
+    );
+  }
 
-	res.status(200).json({
-		success: true,
-		data: post,
-	})
-})
+  res.status(200).json({
+    success: true,
+    data: post,
+  });
+});
 
 // @desc    Create Post
 // @route   /api/v1/posts
 export const createPost = asyncHandler(async (req, res, next) => {
-	req.body.user = req.user._id
-	const post = await Post.create(req.body)
-	const populated = await Post.findById(post._id).populate('user')
-	res.status(201).json({
-		success: true,
-		data: populated,
-	})
-})
+  req.body.user = req.user._id;
+  const post = await Post.create(req.body);
+  const populated = await Post.findById(post._id).populate("user");
+  res.status(201).json({
+    success: true,
+    data: populated,
+  });
+});
 
 // @desc    Update Post
 // @route   /api/v1/posts/:id
 export const updatePost = asyncHandler(async (req, res, next) => {
-	const post = await Post.findById(req.params.id)
-	if (!post) {
-		return next(
-			new ErrorResponse(`No post found with ID: ${req.params.id}`, 404)
-		)
-	}
-	if (
-		req.user._id.toString() !== post.user.toString() &&
-		req.user.role !== 'admin'
-	) {
-		return next(
-			new ErrorResponse(`You're not allowed to perform this action`, 403)
-		)
-	}
-	const { text, image } = req.body
-	post.text = text || post.text
-	post.image = image || post.image
-	await post.save()
+  const post = await Post.findById(req.params.id);
+  if (!post) {
+    return next(
+      new ErrorResponse(`No post found with ID: ${req.params.id}`, 404)
+    );
+  }
+  if (
+    req.user._id.toString() !== post.user.toString() &&
+    req.user.role !== "admin"
+  ) {
+    return next(
+      new ErrorResponse(`You're not allowed to perform this action`, 403)
+    );
+  }
+  const { text, image } = req.body;
+  post.text = text || post.text;
+  post.image = image || post.image;
+  await post.save();
 
-	const populated = await Post.findById(post._id).populate('user')
+  const populated = await Post.findById(post._id).populate("user");
 
-	res.json({
-		success: true,
-		data: populated,
-	})
-})
+  res.json({
+    success: true,
+    data: populated,
+  });
+});
 
 // @desc    Delete post
 // @route   /api/v1/posts/:id
 export const deletePost = asyncHandler(async (req, res, next) => {
-	const post = await Post.findById(req.params.id)
+  const post = await Post.findById(req.params.id);
 
-	if (!post) {
-		return next(
-			new ErrorResponse(`No post found with ID: ${req.params.id}`, 404)
-		)
-	}
+  if (!post) {
+    return next(
+      new ErrorResponse(`No post found with ID: ${req.params.id}`, 404)
+    );
+  }
 
-	if (
-		req.user._id.toString() !== post.user.toString() &&
-		req.user.role !== 'admin'
-	) {
-		return next(
-			new ErrorResponse(`You're not allowed to perform this action`, 403)
-		)
-	}
-	await post.delete()
-	res.status(200).json({
-		success: true,
-		data: 'Post deleted successfully',
-	})
-})
+  if (
+    req.user._id.toString() !== post.user.toString() &&
+    req.user.role !== "admin"
+  ) {
+    return next(
+      new ErrorResponse(`You're not allowed to perform this action`, 403)
+    );
+  }
+  await post.delete();
+  res.status(200).json({
+    success: true,
+    data: "Post deleted successfully",
+  });
+});
 
 // @desc 	Like a post
 // @route 	/api/v1/posts/:id/like
 export const likePost = asyncHandler(async (req, res, next) => {
-	const post = await Post.findById(req.params.id)
-	if (!post) {
-		return next(
-			new ErrorResponse(`No post found with ID: ${req.params.id}`, 404)
-		)
-	}
+  const post = await Post.findById(req.params.id);
+  if (!post) {
+    return next(
+      new ErrorResponse(`No post found with ID: ${req.params.id}`, 404)
+    );
+  }
 
-	if (post.likes.includes(req.user._id.toString())) {
-		// Already liked
-		post.likes = post.likes.filter(
-			(like) => like.toString() !== req.user._id.toString()
-		)
-	} else {
-		post.likes = [...post.likes, req.user._id]
-	}
+  if (post.likes.includes(req.user._id.toString())) {
+    // Already liked
+    post.likes = post.likes.filter(
+      (like) => like.toString() !== req.user._id.toString()
+    );
+  } else {
+    post.likes = [...post.likes, req.user._id];
+  }
 
-	await post.save()
+  await post.save();
 
-	res.status(200).json({
-		success: true,
-		data: post,
-	})
-})
+  res.status(200).json({
+    success: true,
+    data: post,
+  });
+});
 
 // @desc 	Share a post
 // @route 	/api/v1/posts/:id/share
 export const sharePost = asyncHandler(async (req, res, next) => {
-	const post = await Post.findById(req.params.id)
-	if (!post) {
-		return next(
-			new ErrorResponse(`No post found with ID: ${req.params.id}`, 404)
-		)
-	}
+  const post = await Post.findById(req.params.id);
+  if (!post) {
+    return next(
+      new ErrorResponse(`No post found with ID: ${req.params.id}`, 404)
+    );
+  }
 
-	if (
-		post.shares.find(
-			(share) => share.user.toString() === req.user._id.toString()
-		)
-	) {
-		return next(new ErrorResponse('You have already shared this post', 302))
-	}
+  if (
+    post.shares.find(
+      (share) => share.user.toString() === req.user._id.toString()
+    )
+  ) {
+    return next(new ErrorResponse("You have already shared this post", 302));
+  }
 
-	req.body.user = req.user._id
-	post.shares = [...post.shares, req.body]
+  req.body.user = req.user._id;
+  post.shares = [...post.shares, req.body];
 
-	await post.save()
+  await post.save();
 
-	res.status(200).json({
-		success: true,
-		data: post,
-	})
-})
+  res.status(200).json({
+    success: true,
+    data: post,
+  });
+});
 
 // @desc 	Get Liked Posts
 // @route	/api/v1/posts/:userId/likes
 export const getLikedPosts = asyncHandler(async (req, res, next) => {
-	const posts = await Post.find().populate({
-		path: 'user shares likes',
-		select: 'firstName lastName username profilePhoto',
-		populate: {
-			path: 'user',
-			select: 'firstName lastName username profilePhoto',
-		},
-	})
-	let userLikedPosts = []
+  const posts = await Post.find().populate({
+    path: "user shares likes",
+    select: "firstName lastName username profilePhoto",
+    populate: {
+      path: "user",
+      select: "firstName lastName username profilePhoto",
+    },
+  });
+  let userLikedPosts = [];
 
-	posts.forEach((post) => {
-		post.likes.map((like) => {
-			if (like._id.toString() === req.params.userId) {
-				userLikedPosts.push(post)
-			}
-		})
-	})
+  posts.forEach((post) => {
+    post.likes.map((like) => {
+      if (like._id.toString() === req.params.userId) {
+        userLikedPosts.push(post);
+      }
+    });
+  });
 
-	res.status(200).json({
-		success: true,
-		count: userLikedPosts.length,
-		data: userLikedPosts,
-	})
-})
+  res.status(200).json({
+    success: true,
+    count: userLikedPosts.length,
+    data: userLikedPosts,
+  });
+});
 
 // @desc 	Get Shared Posts
 // @route	/api/v1/posts/:userId/shares
 export const getSharedPosts = asyncHandler(async (req, res, next) => {
-	const posts = await Post.find().populate({
-		path: 'user shares likes',
-		select: 'firstName lastName username profilePhoto',
-		populate: {
-			path: 'user',
-			select: 'firstName lastName username profilePhoto',
-		},
-	})
-	let userSharedPosts = []
+  const posts = await Post.find().populate({
+    path: "user shares likes",
+    select: "firstName lastName username profilePhoto",
+    populate: {
+      path: "user",
+      select: "firstName lastName username profilePhoto",
+    },
+  });
+  let userSharedPosts = [];
 
-	posts.forEach((post) => {
-		post.shares.map((share) => {
-			console.log('share is: ', share)
-			if (
-				share.user &&
-				share.user._id.toString() === req.params.userId.toString()
-			) {
-				userSharedPosts.push(post)
-			}
-		})
-	})
+  posts.forEach((post) => {
+    post.shares.map((share) => {
+      if (
+        share.user &&
+        share.user._id.toString() === req.params.userId.toString()
+      ) {
+        userSharedPosts.push(post);
+      }
+    });
+  });
 
-	res.status(200).json({
-		success: true,
-		count: userSharedPosts.length,
-		data: userSharedPosts,
-	})
-})
+  res.status(200).json({
+    success: true,
+    count: userSharedPosts.length,
+    data: userSharedPosts,
+  });
+});

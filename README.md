@@ -15,6 +15,10 @@ JWT_SECRET = you get to choose
 JWT_EXPIRE = 30d
 JWT_COOKIE_EXPIRE = 30
 
+CLOUDINARY_CLOUD_NAME =
+CLOUDINARY_API_KEY =
+CLOUDINARY_API_SECRET =
+
 SMTP_HOST=
 SMTP_EMAIL =
 SMTP_PASSWORD =
@@ -40,7 +44,7 @@ change NODE_ENV in your .env file to production and run the server again.
 
 ## Live application
 
-The documentation is live at [Upright](https://upright-media.herokuapp.com/)
+The documentation is live at [upright-backend.herokuapp.com](https://upright-backend.herokuapp.com/)
 
 ## App Info
 
