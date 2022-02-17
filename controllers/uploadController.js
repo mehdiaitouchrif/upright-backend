@@ -24,7 +24,7 @@ export const uploadSingleImage = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse("Please import an image ", 400));
   }
   const data = await cloudinary.v2.uploader.upload(req.file.path, {
-    folder: `Upright/profiles/${req.user.username}`,
+    folder: `Upright/profiles`,
   });
 
   res.status(200).json({ success: true, data: data.secure_url });
